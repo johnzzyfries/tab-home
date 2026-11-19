@@ -198,7 +198,7 @@ const tabOutChinese = {
   'just now': '刚刚', 'yesterday': '昨天', '{n} min ago': '{n} 分钟前',
   '{n} hr ago': '{n} 小时前', '{n} hrs ago': '{n} 小时前', '{n} days ago': '{n} 天前',
   '{n} domain': '{n} 个网站', '{n} domains': '{n} 个网站', '{n} item': '{n} 项', '{n} items': '{n} 项',
-  'Homepages': '网站首页', 'Local Files': '本地文件', 'YouTube Video': 'YouTube 视频',
+  'Homepages': '网站首页', 'Local Files': '本地文件', 'Other tabs': '其他标签页', 'YouTube Video': 'YouTube 视频',
   'Save for later': '稍后阅读', 'Close this tab': '关闭此标签页', '+{n} more': '另有 {n} 个',
   '{n} tab open': '{n} 个标签页', '{n} tabs open': '{n} 个标签页',
   '{n} duplicate': '{n} 个重复项', '{n} duplicates': '{n} 个重复项',

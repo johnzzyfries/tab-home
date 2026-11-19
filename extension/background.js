@@ -29,6 +29,7 @@ async function updateBadge() {
     const count = tabs.filter(t => {
       const url = t.url || '';
       return (
+        url !== '' &&
         !url.startsWith('chrome://') &&
         !url.startsWith('chrome-extension://') &&
         !url.startsWith('about:') &&
