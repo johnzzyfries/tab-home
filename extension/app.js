@@ -23,14 +23,14 @@
    access to chrome.tabs and chrome.storage. No middleman needed.
    ---------------------------------------------------------------- */
 
-// All open tabs — populated by fetchOpenTabs()
+// All open tabs — populated by refreshOpenTabs()
 let openTabs = [];
 
 /**
  * fetchOpenTabs()
  *
  * Reads all currently open browser tabs directly from Chrome.
- * Sets the extensionId flag so we can identify Tab Out's own pages.
+ * Flags Tab Out's own pages so we can identify them in the dashboard.
  */
 async function fetchOpenTabs() {
   try {
@@ -39,7 +39,7 @@ async function fetchOpenTabs() {
     const newtabUrl = `chrome-extension://${extensionId}/index.html`;
 
     const tabs = await chrome.tabs.query({});
-    openTabs = tabs.map(t => ({
+    return tabs.map(t => ({
       id:       t.id,
       url:      t.url,
       title:    t.title,
@@ -50,16 +50,14 @@ async function fetchOpenTabs() {
     }));
   } catch {
     // chrome.tabs API unavailable (shouldn't happen in an extension page)
-    openTabs = [];
+    return [];
   }
-  document.getElementById('openTabsTotal').textContent = getRealTabs().length;
 }
 
 /**
  * closeTabsByUrls(urls)
  *
  * Closes all open tabs whose hostname matches any of the given URLs.
- * After closing, re-fetches the tab list to keep our state accurate.
  *
  * Special case: file:// URLs are matched exactly (they have no hostname).
  */
@@ -92,7 +90,6 @@ async function closeTabsByUrls(urls) {
     .map(tab => tab.id);
 
   if (toClose.length > 0) await chrome.tabs.remove(toClose);
-  await fetchOpenTabs();
 }
 
 /**
@@ -107,7 +104,6 @@ async function closeTabsExact(urls) {
   const allTabs = await chrome.tabs.query({});
   const toClose = allTabs.filter(t => urlSet.has(t.url)).map(t => t.id);
   if (toClose.length > 0) await chrome.tabs.remove(toClose);
-  await fetchOpenTabs();
 }
 
 /**
@@ -167,7 +163,6 @@ async function closeDuplicateTabs(urls, keepOne = true) {
   }
 
   if (toClose.length > 0) await chrome.tabs.remove(toClose);
-  await fetchOpenTabs();
 }
 
 /**
@@ -195,7 +190,6 @@ async function closeTabOutDupes() {
     tabOutTabs[0];
   const toClose = tabOutTabs.filter(t => t.id !== keep.id).map(t => t.id);
   if (toClose.length > 0) await chrome.tabs.remove(toClose);
-  await fetchOpenTabs();
 }
 
 
@@ -415,8 +409,7 @@ function shootConfetti(x, y) {
 /**
  * animateCardOut(card)
  *
- * Smoothly removes a mission card: fade + scale down, then confetti.
- * After the animation, checks if the grid is now empty.
+ * Plays the closing animation before the next open-tabs refresh.
  */
 function animateCardOut(card) {
   if (!card) return;
@@ -425,10 +418,6 @@ function animateCardOut(card) {
   shootConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
 
   card.classList.add('closing');
-  setTimeout(() => {
-    card.remove();
-    checkAndShowEmptyState();
-  }, 300);
 }
 
 /**
@@ -444,17 +433,11 @@ function showToast(message) {
 }
 
 /**
- * checkAndShowEmptyState()
+ * showOpenTabsEmptyState()
  *
  * Shows a cheerful "Inbox zero" message when all domain cards are gone.
  */
-function checkAndShowEmptyState() {
-  const missionsEl = document.getElementById('openTabsMissions');
-  if (!missionsEl) return;
-
-  const remaining = missionsEl.querySelectorAll('.mission-card:not(.closing)').length;
-  if (remaining > 0) return;
-
+function showOpenTabsEmptyState(missionsEl, countEl) {
   missionsEl.innerHTML = `
     <div class="missions-empty-state">
       <div class="empty-checkmark">
@@ -467,8 +450,7 @@ function checkAndShowEmptyState() {
     </div>
   `;
 
-  const countEl = document.getElementById('openTabsSectionCount');
-  if (countEl) countEl.textContent = t('{n} domains', { n: 0 });
+  countEl.textContent = t('{n} domains', { n: 0 });
 }
 
 /**
@@ -1000,23 +982,17 @@ function renderArchiveItem(item) {
    ---------------------------------------------------------------- */
 
 /**
- * renderStaticDashboard()
- *
- * The main render function:
- * 1. Paints the date
- * 2. Fetches open tabs via chrome.tabs.query()
- * 3. Groups tabs by domain (with landing pages pulled out to their own group)
- * 4. Renders domain cards
- * 5. Updates the open tabs count
- * 6. Renders the "Saved for Later" checklist
+ * Refreshes the open-tabs summary and cards from the same Chrome snapshot.
  */
-async function renderStaticDashboard() {
-  // --- Header ---
-  const dateEl     = document.getElementById('dateDisplay');
-  if (dateEl)     dateEl.textContent     = getDateDisplay();
+let openTabsRefreshVersion = 0;
+let openTabsRefreshTimer;
 
-  // --- Fetch tabs ---
-  await fetchOpenTabs();
+async function refreshOpenTabs() {
+  const version = ++openTabsRefreshVersion;
+  const tabs = await fetchOpenTabs();
+  if (version !== openTabsRefreshVersion) return;
+
+  openTabs = tabs;
   const realTabs = getRealTabs();
 
   // --- Group tabs by domain ---
@@ -1136,24 +1112,30 @@ async function renderStaticDashboard() {
   const openTabsMissionsEl   = document.getElementById('openTabsMissions');
   const openTabsSectionCount = document.getElementById('openTabsSectionCount');
 
+  document.getElementById('openTabsTotal').textContent = realTabs.length;
   openTabsSection.style.display = 'block';
   if (domainGroups.length > 0) {
     openTabsSectionCount.innerHTML = `${t(domainGroups.length === 1 ? '{n} domain' : '{n} domains', { n: domainGroups.length })} &nbsp;&middot;&nbsp; <button class="action-btn close-tabs" data-action="close-all-open-tabs" style="font-size:11px;padding:3px 10px;">${ICONS.close} ${t(realTabs.length === 1 ? 'Close all {n} tab' : 'Close all {n} tabs', { n: realTabs.length })}</button>`;
     openTabsMissionsEl.innerHTML = domainGroups.map(g => renderDomainCard(g)).join('');
   } else {
-    openTabsMissionsEl.replaceChildren();
-    checkAndShowEmptyState();
+    showOpenTabsEmptyState(openTabsMissionsEl, openTabsSectionCount);
   }
 
   // --- Check for duplicate Tab Out tabs ---
   checkTabOutDupes();
+}
 
-  // --- Render "Saved for Later" column ---
-  await renderDeferredColumn();
+function scheduleOpenTabsRefresh() {
+  clearTimeout(openTabsRefreshTimer);
+  // Batch close events and let the closing animation finish.
+  openTabsRefreshTimer = setTimeout(refreshOpenTabs, 300);
 }
 
 async function renderDashboard() {
-  await renderStaticDashboard();
+  const dateEl = document.getElementById('dateDisplay');
+  if (dateEl) dateEl.textContent = getDateDisplay();
+  await refreshOpenTabs();
+  await renderDeferredColumn();
 }
 
 
@@ -1215,7 +1197,6 @@ document.addEventListener('click', async (e) => {
     const allTabs = await chrome.tabs.query({});
     const match   = allTabs.find(t => t.url === tabUrl);
     if (match) await chrome.tabs.remove(match.id);
-    await fetchOpenTabs();
 
     playCloseSound();
 
@@ -1227,17 +1208,9 @@ document.addEventListener('click', async (e) => {
       chip.style.transition = 'opacity 0.2s, transform 0.2s';
       chip.style.opacity    = '0';
       chip.style.transform  = 'scale(0.8)';
-      setTimeout(() => {
-        chip.remove();
-        // If the card now has no tabs, remove it too
-        const parentCard = document.querySelector('.mission-card:has(.mission-pages:empty)');
-        if (parentCard) animateCardOut(parentCard);
-        document.querySelectorAll('.mission-card').forEach(c => {
-          if (c.querySelectorAll('.page-chip[data-action="focus-tab"]').length === 0) {
-            animateCardOut(c);
-          }
-        });
-      }, 200);
+      if (card && domainGroups.find(group => group.tabs.some(tab => tab.id === match?.id))?.tabs.length === 1) {
+        animateCardOut(card);
+      }
     }
 
     showToast(t('Tab closed'));
@@ -1264,7 +1237,6 @@ document.addEventListener('click', async (e) => {
     const allTabs = await chrome.tabs.query({});
     const match   = allTabs.find(t => t.url === tabUrl);
     if (match) await chrome.tabs.remove(match.id);
-    await fetchOpenTabs();
 
     // Animate chip out
     const chip = actionEl.closest('.page-chip');
@@ -1272,7 +1244,6 @@ document.addEventListener('click', async (e) => {
       chip.style.transition = 'opacity 0.2s, transform 0.2s';
       chip.style.opacity    = '0';
       chip.style.transform  = 'scale(0.8)';
-      setTimeout(() => chip.remove(), 200);
     }
 
     showToast(t('Saved for later'));
@@ -1344,10 +1315,6 @@ document.addEventListener('click', async (e) => {
       animateCardOut(card);
     }
 
-    // Remove from in-memory groups
-    const idx = domainGroups.indexOf(group);
-    if (idx !== -1) domainGroups.splice(idx, 1);
-
     const groupLabel = group.domain === '__landing-pages__' ? t('Homepages') : (group.label || friendlyDomain(group.domain));
     showToast(t(urls.length === 1 ? 'Closed {n} tab from {group}' : 'Closed {n} tabs from {group}', { n: urls.length, group: groupLabel }));
 
@@ -1366,20 +1333,17 @@ document.addEventListener('click', async (e) => {
     // Hide the dedup button
     actionEl.style.transition = 'opacity 0.2s';
     actionEl.style.opacity    = '0';
-    setTimeout(() => actionEl.remove(), 200);
 
     // Remove dupe badges from the card
     if (card) {
       card.querySelectorAll('.chip-dupe-badge').forEach(b => {
         b.style.transition = 'opacity 0.2s';
         b.style.opacity    = '0';
-        setTimeout(() => b.remove(), 200);
       });
       card.querySelectorAll('.open-tabs-badge').forEach(badge => {
         if (badge.classList.contains('duplicate-badge')) {
           badge.style.transition = 'opacity 0.2s';
           badge.style.opacity    = '0';
-          setTimeout(() => badge.remove(), 200);
         }
       });
       card.classList.remove('has-amber-bar');
@@ -1398,13 +1362,7 @@ document.addEventListener('click', async (e) => {
     await closeTabsByUrls(allUrls);
     playCloseSound();
 
-    document.querySelectorAll('#openTabsMissions .mission-card').forEach(c => {
-      shootConfetti(
-        c.getBoundingClientRect().left + c.offsetWidth / 2,
-        c.getBoundingClientRect().top  + c.offsetHeight / 2
-      );
-      animateCardOut(c);
-    });
+    document.querySelectorAll('#openTabsMissions .mission-card').forEach(animateCardOut);
 
     showToast(t('All tabs closed. Fresh start.'));
     return;
@@ -1457,4 +1415,5 @@ document.addEventListener('input', async (e) => {
 /* ----------------------------------------------------------------
    INITIALIZE
    ---------------------------------------------------------------- */
+chrome.tabs.onRemoved.addListener(scheduleOpenTabsRefresh);
 renderDashboard();
