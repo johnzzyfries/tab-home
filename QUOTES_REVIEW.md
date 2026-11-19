@@ -101,10 +101,10 @@
   - 版本说明：何怀宏中译、George Long 英译，《沉思录》第六卷第六节。 [何怀宏译本](<https://dodobook.com/index.php?id=books/chensilu/007>) · [George Long 英译](<https://classics.mit.edu/Antoninus/meditations.6.six.html>)
 
 - [x] **52 · 勒内·笛卡尔（René Descartes）**
-  - 中文：我想，所以我是。
+  - 中文：我思故我在
   - English: I think, therefore I am.
   - 出处：[《谈谈方法》第四部分 / Discourse on Method, Part IV](<https://www.marxists.org/reference/subject/philosophy/works/fr/descarte.htm>)
-  - 版本说明：法语原文是「je pense, donc je suis」。采用王太庆《谈谈方法》第四部分正文第 27 页的译法。王太庆也提出过「我在思想，所以有我」的译法。 [王太庆译本](<https://www.scribd.com/document/551942502/>) · [商务印书馆的版本说明](<https://www.cp.com.cn/Content/2013/11-11/1920345820.html>) · [英文版第四部分](<https://www.marxists.org/reference/subject/philosophy/works/fr/descarte.htm>)
+  - 版本说明：中文采用指定措辞。法语原文是「je pense, donc je suis」。 [商务印书馆的版本说明](<https://www.cp.com.cn/Content/2013/11-11/1920345820.html>) · [英文版第四部分](<https://www.marxists.org/reference/subject/philosophy/works/fr/descarte.htm>)
 
 - [x] **54 · 巴鲁赫·斯宾诺莎（Baruch Spinoza）**
   - 中文：但是一切高贵的事物，其难得正如它们的稀少一样。

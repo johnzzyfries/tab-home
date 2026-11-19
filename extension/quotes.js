@@ -65,7 +65,7 @@ const quoteLibrary = [
     ]],
   ["勒内·笛卡尔", "René Descartes", "《谈谈方法》第四部分", "Discourse on Method, Part IV",
     "https://www.marxists.org/reference/subject/philosophy/works/fr/descarte.htm", [
-      ["我想，所以我是。", "I think, therefore I am."],
+      ["我思故我在", "I think, therefore I am."],
     ]],
   ["巴鲁赫·斯宾诺莎", "Baruch Spinoza", "《伦理学》第五部，命题四十二附释", "Ethics, V, Proposition 42, Note",
     "https://en.wikisource.org/wiki/Ethics_(Spinoza)/Part_5", [
