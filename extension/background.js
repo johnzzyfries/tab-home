@@ -5,7 +5,7 @@
  * Its only job: keep the toolbar badge showing the current open tab count.
  *
  * Since we no longer have a server, we query chrome.tabs directly.
- * The badge counts real web tabs (skipping chrome:// and extension pages).
+ * The badge counts all tabs Chrome makes available to Tab Home.
  *
  * Color coding gives a quick at-a-glance health signal:
  *   Green  (#3d7a4a) → 1–10 tabs  (focused, manageable)
@@ -18,25 +18,11 @@
 /**
  * updateBadge()
  *
- * Counts open real-web tabs and updates the extension's toolbar badge.
- * "Real" tabs = not chrome://, not extension pages, not about:blank.
+ * Counts open tabs and updates the extension's toolbar badge.
  */
 async function updateBadge() {
   try {
-    const tabs = await chrome.tabs.query({});
-
-    // Only count actual web pages — skip browser internals and extension pages
-    const count = tabs.filter(t => {
-      const url = t.url || '';
-      return (
-        url !== '' &&
-        !url.startsWith('chrome://') &&
-        !url.startsWith('chrome-extension://') &&
-        !url.startsWith('about:') &&
-        !url.startsWith('edge://') &&
-        !url.startsWith('brave://')
-      );
-    }).length;
+    const { length: count } = await chrome.tabs.query({});
 
     // Don't show "0" — an empty badge is cleaner
     await chrome.action.setBadgeText({ text: count > 0 ? String(count) : '' });

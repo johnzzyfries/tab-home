@@ -80,7 +80,7 @@
   function makeRow(tab, options) {
     const row = element('li', 'organizer-tab');
     row.dataset.tabId = tab.id;
-    row.draggable = true;
+    row.draggable = Boolean(locations.get(tab.id)?.movable);
     const title = tab.title || tab.url || t('Untitled tab');
     const open = element('button', 'organizer-tab-title', title);
     open.type = 'button';
@@ -123,7 +123,7 @@
     const version = ++renderVersion;
     try {
       const [windows, groups, current] = await Promise.all([
-        chrome.windows.getAll({ windowTypes: ['normal'], populate: true }),
+        chrome.windows.getAll({ windowTypes: ['normal', 'popup'], populate: true }),
         chrome.tabGroups.query({}),
         chrome.windows.getCurrent(),
       ]);
@@ -135,11 +135,10 @@
 
       targets = new Map();
       locations = new Map();
-      const ownUrl = chrome.runtime.getURL('index.html');
       const cards = [...windows].sort((a, b) => a.id - b.id).map((window, index) => {
         const label = t('Window {n}', { n: index + 1 });
         const tabs = (window.tabs || [])
-          .filter(tab => tab.id !== undefined && tab.url !== ownUrl && tab.url !== 'chrome://newtab/')
+          .filter(tab => tab.id !== undefined)
           .sort((a, b) => a.index - b.index);
         const sections = [{ id: ungrouped, title: t('Ungrouped') },
           ...groups.filter(group => group.windowId === window.id)];
@@ -147,7 +146,7 @@
           const key = window.id + ':' + group.id;
           const title = group.title || t('Unnamed group');
           const target = { key, windowId: window.id, groupId: group.id, title,
-            label: label + ' · ' + title, color: group.color, incognito: window.incognito };
+            label: label + ' · ' + title, color: group.color, incognito: window.incognito, movable: window.type === 'normal' };
           targets.set(key, target);
           return target;
         });
@@ -159,7 +158,7 @@
           if (lanes.at(-1)?.target !== target) lanes.push({ target, tabs: [] });
           lanes.at(-1).tabs.push(tab);
           populated.add(target);
-          locations.set(tab.id, { key: target.key, pinned: tab.pinned });
+          locations.set(tab.id, { key: target.key, pinned: tab.pinned, movable: target.movable });
         }
         for (const target of destinations) {
           if (!populated.has(target)) lanes.push({ target, tabs: [] });
@@ -174,7 +173,9 @@
         card.dataset.dropTarget = ungroupedKey;
         const heading = element('h3', '', label + (window.id === current.id ? ' · ' + t('Current') : ''));
         card.append(heading, element('p', 'organizer-count', t(count === 1 ? '{n} tab' : '{n} tabs', { n: count })));
-        const options = [...targets.values()].filter(target => target.incognito === window.incognito);
+        const options = window.type === 'normal'
+          ? [...targets.values()].filter(target => target.movable && target.incognito === window.incognito)
+          : [];
         for (const { target, tabs } of lanes) {
           const lane = element('div', 'organizer-lane');
           lane.dataset.dropTarget = target.key;
@@ -211,7 +212,7 @@
     const source = locations.get(dragId);
     const origin = targets.get(source?.key);
     const target = targets.get(lane?.dataset.dropTarget);
-    if (!target || !origin || origin.incognito !== target.incognito ||
+    if (!target?.movable || !origin?.movable || origin.incognito !== target.incognito ||
         (source.pinned && target.groupId !== ungrouped)) return;
 
     const row = event.target.closest('.organizer-tab');
@@ -234,7 +235,7 @@
 
   board.addEventListener('dragstart', event => {
     const row = event.target.closest('.organizer-tab');
-    if (!row || moving || event.target.closest('select')) {
+    if (!row?.draggable || moving || event.target.closest('select')) {
       event.preventDefault();
       return;
     }

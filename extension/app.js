@@ -26,6 +26,11 @@
 // All open tabs — populated by refreshOpenTabs()
 let openTabs = [];
 
+function isTabHomeUrl(url) {
+  const page = (url || '').split(/[?#]/, 1)[0];
+  return page === chrome.runtime.getURL('index.html') || /^chrome:\/\/newtab\/?$/.test(page);
+}
+
 /**
  * fetchOpenTabs()
  *
@@ -34,19 +39,13 @@ let openTabs = [];
  */
 async function fetchOpenTabs() {
   try {
-    const extensionId = chrome.runtime.id;
-    // The new URL for this page is now index.html (not newtab.html)
-    const newtabUrl = `chrome-extension://${extensionId}/index.html`;
-
-    const tabs = await chrome.tabs.query({});
+    const [tabs, current] = await Promise.all([chrome.tabs.query({}), chrome.tabs.getCurrent()]);
     return tabs.map(t => ({
       id:       t.id,
-      url:      t.url,
+      url:      t.url || '',
       title:    t.title,
-      windowId: t.windowId,
-      active:   t.active,
-      // Flag Tab Home's own pages so we can detect duplicate new tabs
-      isTabOut: t.url === newtabUrl || t.url === 'chrome://newtab/',
+      isTabHome: isTabHomeUrl(t.url),
+      isCurrent: t.id === current?.id,
     }));
   } catch {
     // chrome.tabs API unavailable (shouldn't happen in an extension page)
@@ -54,37 +53,14 @@ async function fetchOpenTabs() {
   }
 }
 
-/**
- * focusTab(url)
- *
- * Switches Chrome to the tab with the given URL (exact match first,
- * then hostname fallback). Also brings the window to the front.
- */
-async function focusTab(url) {
-  if (!url) return;
-  const allTabs = await chrome.tabs.query({});
-  const currentWindow = await chrome.windows.getCurrent();
-
-  // Try exact URL match first
-  let matches = allTabs.filter(t => t.url === url);
-
-  // Fall back to hostname match
-  if (matches.length === 0) {
-    try {
-      const targetHost = new URL(url).hostname;
-      matches = allTabs.filter(t => {
-        try { return new URL(t.url).hostname === targetHost; }
-        catch { return false; }
-      });
-    } catch {}
+// Focus the exact tab behind a dashboard row, including identical URLs.
+async function focusTab(id) {
+  try {
+    const tab = await chrome.tabs.update(id, { active: true });
+    await chrome.windows.update(tab.windowId, { focused: true });
+  } catch {
+    showToast(t('This tab is no longer available.'));
   }
-
-  if (matches.length === 0) return;
-
-  // Prefer a match in a different window so it actually switches windows
-  const match = matches.find(t => t.windowId !== currentWindow.id) || matches[0];
-  await chrome.tabs.update(match.id, { active: true });
-  await chrome.windows.update(match.windowId, { focused: true });
 }
 
 /**
@@ -119,24 +95,9 @@ async function closeDuplicateTabs(urls, keepOne = true) {
  * Closes all duplicate Tab Home new-tab pages except the current one.
  */
 async function closeTabOutDupes() {
-  const extensionId = chrome.runtime.id;
-  const newtabUrl = `chrome-extension://${extensionId}/index.html`;
-
-  const allTabs = await chrome.tabs.query({});
-  const currentWindow = await chrome.windows.getCurrent();
-  const tabOutTabs = allTabs.filter(t =>
-    t.url === newtabUrl || t.url === 'chrome://newtab/'
-  );
-
-  if (tabOutTabs.length <= 1) return;
-
-  // Keep the active Tab Home tab in the CURRENT window — that's the one the
-  // user is looking at right now. Falls back to any active one, then the first.
-  const keep =
-    tabOutTabs.find(t => t.active && t.windowId === currentWindow.id) ||
-    tabOutTabs.find(t => t.active) ||
-    tabOutTabs[0];
-  const toClose = tabOutTabs.filter(t => t.id !== keep.id).map(t => t.id);
+  const [allTabs, current] = await Promise.all([chrome.tabs.query({}), chrome.tabs.getCurrent()]);
+  if (!current) return;
+  const toClose = allTabs.filter(t => isTabHomeUrl(t.url) && t.id !== current.id).map(t => t.id);
   if (toClose.length > 0) await chrome.tabs.remove(toClose);
 }
 
@@ -398,7 +359,7 @@ function showOpenTabsEmptyState(missionsEl, countEl) {
     </div>
   `;
 
-  countEl.textContent = t('{n} domains', { n: 0 });
+  countEl.textContent = t('{n} groups', { n: 0 });
 }
 
 /**
@@ -634,24 +595,12 @@ let domainGroups = [];
    HELPER: filter out browser-internal pages
    ---------------------------------------------------------------- */
 
-/**
- * getRealTabs()
- *
- * Returns tabs that are real web pages — no chrome://, extension
- * pages, about:blank, etc.
- */
-function getRealTabs(tabs) {
-  return tabs.filter(t => {
-    const url = t.url || '';
-    return (
-      url !== '' &&
-      !url.startsWith('chrome://') &&
-      !url.startsWith('chrome-extension://') &&
-      !url.startsWith('about:') &&
-      !url.startsWith('edge://') &&
-      !url.startsWith('brave://')
-    );
-  });
+function isBrowserPage(url) {
+  return /^(?:chrome(?:-untrusted|-search)?|about|edge|brave|devtools):/.test(url);
+}
+
+function isWebTab(tab) {
+  return Boolean(tab.url && !isBrowserPage(tab.url) && !tab.url.startsWith('chrome-extension://'));
 }
 
 function escapeHtml(value) {
@@ -677,7 +626,7 @@ function domainCardId(group) {
  * shows a banner offering to close the extras.
  */
 function checkTabOutDupes() {
-  const tabOutTabs = openTabs.filter(t => t.isTabOut);
+  const tabOutTabs = openTabs.filter(t => t.isTabHome);
   const banner  = document.getElementById('tabOutDupeBanner');
   const countEl = document.getElementById('tabOutDupeCount');
   if (!banner) return;
@@ -692,58 +641,54 @@ function checkTabOutDupes() {
 
 
 /* ----------------------------------------------------------------
-   OVERFLOW CHIPS ("+N more" expand button in domain cards)
-   ---------------------------------------------------------------- */
-
-function buildOverflowChips(hiddenTabs, urlCounts = {}) {
-  const hiddenChips = hiddenTabs.map(tab => {
-    const label    = cleanTitle(smartTitle(stripTitleNoise(tab.title || ''), tab.url), '');
-    const count    = urlCounts[tab.url] || 1;
-    const dupeTag  = count > 1 ? ` <span class="chip-dupe-badge">(${count}x)</span>` : '';
-    const chipClass = count > 1 ? ' chip-has-dupes' : '';
-    const safeUrl   = escapeHtml(tab.url);
-    const safeTitle = escapeHtml(label);
-    return `<div class="page-chip clickable${chipClass}" data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}">
-      ${renderTabFavicon(tab.url)}
-      <span class="chip-text">${safeTitle}</span>${dupeTag}
-      <div class="chip-actions">
-        <button class="chip-action chip-save" data-action="defer-single-tab" data-tab-url="${safeUrl}" data-tab-title="${safeTitle}" title="${t('Save for later')}">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
-        </button>
-        <button class="chip-action chip-close" data-action="close-single-tab" data-tab-url="${safeUrl}" title="${t('Close this tab')}">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
-        </button>
-      </div>
-    </div>`;
-  }).join('');
-
-  return `
-    <div class="page-chips-overflow" style="display:none">${hiddenChips}</div>
-    <div class="page-chip page-chip-overflow clickable" data-action="expand-chips">
-      <span class="chip-text">${t('+{n} more', { n: hiddenTabs.length })}</span>
-    </div>`;
-}
-
-
-/* ----------------------------------------------------------------
    DOMAIN CARD RENDERER
    ---------------------------------------------------------------- */
 
+function renderTabChip(tab, group, count) {
+  let label = cleanTitle(smartTitle(stripTitleNoise(tab.title || ''), tab.url), group.domain) || t('Untitled tab');
+  // For localhost tabs, prepend port number so you can tell projects apart
+  try {
+    const parsed = new URL(tab.url);
+    if (parsed.hostname === 'localhost' && parsed.port) label = `${parsed.port} ${label}`;
+  } catch {}
+  const dupeTag  = count > 1 ? ` <span class="chip-dupe-badge">(${count}x)</span>` : '';
+  const chipClass = count > 1 ? ' chip-has-dupes' : '';
+  const safeUrl   = escapeHtml(tab.url);
+  const safeTitle = escapeHtml(label);
+  return `<div class="page-chip clickable${chipClass}" data-action="focus-tab" data-tab-id="${tab.id}" data-tab-url="${safeUrl}" title="${safeTitle}">
+    ${renderTabFavicon(tab.url)}
+    <span class="chip-text">${safeTitle}</span>${tab.isCurrent ? ` <span class="chip-dupe-badge">${t('This tab')}</span>` : ''}${dupeTag}
+    <div class="chip-actions">
+      ${isWebTab(tab) ? `<button class="chip-action chip-save" data-action="defer-single-tab" data-tab-id="${tab.id}" data-tab-url="${safeUrl}" data-tab-title="${safeTitle}" title="${t('Save for later')}">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
+      </button>` : ''}
+      ${tab.isCurrent ? '' : `<button class="chip-action chip-close" data-action="close-single-tab" data-tab-id="${tab.id}" data-tab-url="${safeUrl}" title="${t('Close this tab')}">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+      </button>`}
+    </div>
+  </div>`;
+}
+
 /**
- * renderDomainCard(group, groupIndex)
+ * renderDomainCard(group)
  *
  * Builds the HTML for one domain group card.
- * group = { domain: string, tabs: [{ url, title, id, windowId, active }] }
+ * group = { domain: string, tabs: [{ url, title, id, isCurrent }] }
  */
 function renderDomainCard(group) {
   const tabs      = group.tabs || [];
   const tabCount  = tabs.length;
+  const closableCount = tabs.filter(tab => !tab.isCurrent).length;
   const isLanding = group.domain === '__landing-pages__';
   const stableId  = domainCardId(group);
 
   // Count duplicates (exact URL match)
-  const urlCounts = {};
-  for (const tab of tabs) urlCounts[tab.url] = (urlCounts[tab.url] || 0) + 1;
+  const urlCounts = Object.create(null);
+  if (!group.showEveryTab) {
+    for (const { url } of tabs) {
+      if (url) urlCounts[url] = (urlCounts[url] || 0) + 1;
+    }
+  }
   const dupeUrls   = Object.entries(urlCounts).filter(([, c]) => c > 1);
   const hasDupes   = dupeUrls.length > 0;
   const totalExtras = dupeUrls.reduce((s, [, c]) => s + c - 1, 0);
@@ -759,47 +704,33 @@ function renderDomainCard(group) {
       </span>`
     : '';
 
-  // Deduplicate for display: show each URL once, with (Nx) badge if duped
+  // Keep a separate row for each browser and extension page.
   const seen = new Set();
-  const uniqueTabs = [];
-  for (const tab of tabs) {
-    if (!seen.has(tab.url)) { seen.add(tab.url); uniqueTabs.push(tab); }
-  }
+  const uniqueTabs = tabs.filter(tab => {
+    if (group.showEveryTab || !tab.url) return true;
+    if (seen.has(tab.url)) return false;
+    seen.add(tab.url);
+    return true;
+  });
 
   const visibleTabs = uniqueTabs.slice(0, 8);
   const extraCount  = uniqueTabs.length - visibleTabs.length;
 
-  const pageChips = visibleTabs.map(tab => {
-    let label = cleanTitle(smartTitle(stripTitleNoise(tab.title || ''), tab.url), group.domain);
-    // For localhost tabs, prepend port number so you can tell projects apart
-    try {
-      const parsed = new URL(tab.url);
-      if (parsed.hostname === 'localhost' && parsed.port) label = `${parsed.port} ${label}`;
-    } catch {}
-    const count    = urlCounts[tab.url];
-    const dupeTag  = count > 1 ? ` <span class="chip-dupe-badge">(${count}x)</span>` : '';
-    const chipClass = count > 1 ? ' chip-has-dupes' : '';
-    const safeUrl   = escapeHtml(tab.url);
-    const safeTitle = escapeHtml(label);
-    return `<div class="page-chip clickable${chipClass}" data-action="focus-tab" data-tab-url="${safeUrl}" title="${safeTitle}">
-      ${renderTabFavicon(tab.url)}
-      <span class="chip-text">${safeTitle}</span>${dupeTag}
-      <div class="chip-actions">
-        <button class="chip-action chip-save" data-action="defer-single-tab" data-tab-url="${safeUrl}" data-tab-title="${safeTitle}" title="${t('Save for later')}">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
-        </button>
-        <button class="chip-action chip-close" data-action="close-single-tab" data-tab-url="${safeUrl}" title="${t('Close this tab')}">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
-        </button>
-      </div>
-    </div>`;
-  }).join('') + (extraCount > 0 ? buildOverflowChips(uniqueTabs.slice(8), urlCounts) : '');
+  const chip = tab => renderTabChip(tab, group, urlCounts[tab.url] || 1);
+  const pageChips = visibleTabs.map(chip).join('') + (extraCount > 0 ? `
+    <div class="page-chips-overflow" style="display:none">${uniqueTabs.slice(8).map(chip).join('')}</div>
+    <div class="page-chip page-chip-overflow clickable" data-action="expand-chips">
+      <span class="chip-text">${t('+{n} more', { n: extraCount })}</span>
+    </div>` : '');
 
-  let actionsHtml = `
+  const closeLabel = closableCount < tabCount
+    ? (closableCount === 1 ? 'Close {n} other tab' : 'Close {n} other tabs')
+    : (closableCount === 1 ? 'Close all {n} tab' : 'Close all {n} tabs');
+  let actionsHtml = closableCount ? `
     <button class="action-btn close-tabs" data-action="close-domain-tabs" data-domain-id="${stableId}">
       ${ICONS.close}
-      ${t(tabCount === 1 ? 'Close all {n} tab' : 'Close all {n} tabs', { n: tabCount })}
-    </button>`;
+      ${t(closeLabel, { n: closableCount })}
+    </button>` : '';
 
   if (hasDupes) {
     const dupeUrlsEncoded = dupeUrls.map(([url]) => encodeURIComponent(url)).join(',');
@@ -953,7 +884,6 @@ async function refreshOpenTabs() {
   if (version !== openTabsRefreshVersion) return;
 
   openTabs = tabs;
-  const realTabs = getRealTabs(openTabs);
 
   // --- Group tabs by domain ---
   // Landing pages (Gmail inbox, Twitter home, etc.) get their own special group
@@ -1012,7 +942,16 @@ async function refreshOpenTabs() {
     } catch { return null; }
   }
 
-  for (const tab of realTabs) {
+  for (const tab of openTabs) {
+    const specialGroup = tab.isTabHome ? ['__tab-home__', 'Tab Home']
+      : tab.url.startsWith('chrome-extension://') ? ['__extension-pages__', 'Extension pages']
+      : isBrowserPage(tab.url) ? ['__browser-pages__', 'Browser pages'] : null;
+    if (specialGroup) {
+      const [domain, title] = specialGroup;
+      const group = groupMap[domain] ??= { domain, label: t(title), showEveryTab: true, tabs: [] };
+      group.tabs.push(tab);
+      continue;
+    }
     if (isLandingPage(tab.url)) {
       landingTabs.push(tab);
       continue;
@@ -1056,10 +995,12 @@ async function refreshOpenTabs() {
   const openTabsMissionsEl   = document.getElementById('openTabsMissions');
   const openTabsSectionCount = document.getElementById('openTabsSectionCount');
 
-  document.getElementById('openTabsTotal').textContent = realTabs.length;
+  document.getElementById('openTabsTotal').textContent = openTabs.length;
   openTabsSection.style.display = 'block';
   if (domainGroups.length > 0) {
-    openTabsSectionCount.innerHTML = `${t(domainGroups.length === 1 ? '{n} domain' : '{n} domains', { n: domainGroups.length })} &nbsp;&middot;&nbsp; <button class="action-btn close-tabs" data-action="close-all-open-tabs" style="font-size:11px;padding:3px 10px;">${ICONS.close} ${t(realTabs.length === 1 ? 'Close all {n} tab' : 'Close all {n} tabs', { n: realTabs.length })}</button>`;
+    const webCount = openTabs.filter(isWebTab).length;
+    const groupCount = t(domainGroups.length === 1 ? '{n} group' : '{n} groups', { n: domainGroups.length });
+    openTabsSectionCount.innerHTML = groupCount + (webCount ? ` &nbsp;&middot;&nbsp; <button class="action-btn close-tabs" data-action="close-all-open-tabs" style="font-size:11px;padding:3px 10px;">${ICONS.close} ${t(webCount === 1 ? 'Close {n} web tab' : 'Close {n} web tabs', { n: webCount })}</button>` : '');
     openTabsMissionsEl.innerHTML = domainGroups.map(g => renderDomainCard(g)).join('');
   } else {
     showOpenTabsEmptyState(openTabsMissionsEl, openTabsSectionCount);
@@ -1126,21 +1067,22 @@ document.addEventListener('click', async (e) => {
 
   // ---- Focus a specific tab ----
   if (action === 'focus-tab') {
-    const tabUrl = actionEl.dataset.tabUrl;
-    if (tabUrl) await focusTab(tabUrl);
+    await focusTab(Number(actionEl.dataset.tabId));
     return;
   }
 
   // ---- Close a single tab ----
   if (action === 'close-single-tab') {
     e.stopPropagation(); // don't trigger parent chip's focus-tab
-    const tabUrl = actionEl.dataset.tabUrl;
-    if (!tabUrl) return;
+    const tabId = Number(actionEl.dataset.tabId);
+    const displayedTab = openTabs.find(tab => tab.id === tabId);
+    if (!displayedTab || displayedTab.isCurrent) return;
 
     // Close the tab in Chrome directly
     const allTabs = await chrome.tabs.query({});
-    const match   = allTabs.find(t => t.url === tabUrl);
-    if (match) await chrome.tabs.remove(match.id);
+    const match = allTabs.find(tab => tab.id === tabId && (tab.url || '') === displayedTab.url);
+    if (!match) return;
+    await chrome.tabs.remove(tabId);
 
     playCloseSound();
 
@@ -1152,7 +1094,7 @@ document.addEventListener('click', async (e) => {
       chip.style.transition = 'opacity 0.2s, transform 0.2s';
       chip.style.opacity    = '0';
       chip.style.transform  = 'scale(0.8)';
-      if (card && domainGroups.find(group => group.tabs.some(tab => tab.id === match?.id))?.tabs.length === 1) {
+      if (card && domainGroups.find(group => group.tabs.some(tab => tab.id === tabId))?.tabs.length === 1) {
         animateCardOut(card);
       }
     }
@@ -1164,6 +1106,7 @@ document.addEventListener('click', async (e) => {
   // ---- Save a single tab for later (then close it) ----
   if (action === 'defer-single-tab') {
     e.stopPropagation();
+    const tabId = Number(actionEl.dataset.tabId);
     const tabUrl   = actionEl.dataset.tabUrl;
     const tabTitle = actionEl.dataset.tabTitle || tabUrl;
     if (!tabUrl) return;
@@ -1179,7 +1122,7 @@ document.addEventListener('click', async (e) => {
 
     // Close the tab in Chrome
     const allTabs = await chrome.tabs.query({});
-    const match   = allTabs.find(t => t.url === tabUrl);
+    const match   = allTabs.find(t => t.id === tabId && t.url === tabUrl);
     if (match) await chrome.tabs.remove(match.id);
 
     // Animate chip out
@@ -1241,15 +1184,15 @@ document.addEventListener('click', async (e) => {
     const group    = domainGroups.find(group => domainCardId(group) === domainId);
     if (!group) return;
 
-    const displayedUrls = new Map(group.tabs.map(tab => [tab.id, tab.url]));
+    const displayedUrls = new Map(group.tabs.filter(tab => !tab.isCurrent).map(tab => [tab.id, tab.url]));
     const currentTabs = await chrome.tabs.query({});
     const ids = currentTabs
-      .filter(tab => tab.url && displayedUrls.get(tab.id) === tab.url)
+      .filter(tab => displayedUrls.get(tab.id) === (tab.url || ''))
       .map(tab => tab.id);
     if (ids.length === 0) return;
     await chrome.tabs.remove(ids);
 
-    if (card) {
+    if (card && !group.tabs.some(tab => tab.isCurrent)) {
       playCloseSound();
       animateCardOut(card);
     }
@@ -1295,14 +1238,14 @@ document.addEventListener('click', async (e) => {
 
   // ---- Close ALL open tabs ----
   if (action === 'close-all-open-tabs') {
-    const tabs = getRealTabs(await chrome.tabs.query({}));
+    const tabs = (await chrome.tabs.query({})).filter(isWebTab);
     if (tabs.length === 0) return;
     await chrome.tabs.remove(tabs.map(tab => tab.id));
     playCloseSound();
 
-    document.querySelectorAll('#openTabsMissions .mission-card').forEach(animateCardOut);
+    document.querySelectorAll('#openTabsMissions .mission-card:has(.chip-save)').forEach(animateCardOut);
 
-    showToast(t('All tabs closed. Fresh start.'));
+    showToast(t('Closed all web tabs.'));
     return;
   }
 });
