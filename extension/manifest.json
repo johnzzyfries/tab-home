@@ -1,13 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Tab Out",
+  "name": "Tab Home",
   "version": "1.0.0",
-  "description": "Keep tabs on your tabs. New tab page that groups your open tabs by domain and lets you close them with style.",
+  "description": "A home for your Chrome tabs. Manage open tabs, favorites, and saved pages from your new tab page.",
   "permissions": ["tabs", "activeTab", "storage", "favicon", "bookmarks", "tabGroups"],
   "chrome_url_overrides": { "newtab": "index.html" },
   "background": { "service_worker": "background.js" },
   "action": {
-    "default_title": "Tab Out",
+    "default_title": "Tab Home",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png"

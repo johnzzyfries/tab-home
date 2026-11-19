@@ -1,10 +1,10 @@
-# Tab Out
+# Tab Home｜标签主页
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-**打开新标签页，看清所有标签页。**
+**打开新标签页，管理所有标签与收藏。**
 
-Tab Out 是一款 Chrome 扩展插件，用清晰的标签页面板替换浏览器的新标签页。它会按域名整理所有已打开的页面，并将 Gmail、X、LinkedIn 等网站的首页集中到一个分组中。关闭标签页时，还会有音效和彩纸动画。
+Tab Home（标签主页）是一款 Chrome 扩展插件，用清晰的标签页面板替换浏览器的新标签页。它会按域名整理所有已打开的页面，并将 Gmail、X、LinkedIn 等网站的首页集中到一个分组中。关闭标签页时，还会有音效和彩纸动画。
 
 无需服务器，无需注册账号，也不调用外部 API。安装扩展后即可使用。
 
@@ -15,7 +15,7 @@ Tab Out 是一款 Chrome 扩展插件，用清晰的标签页面板替换浏览�
 把下面的仓库地址发给你的编程助手（例如 Claude Code、Codex），并说：**“帮我安装这个扩展。”**
 
 ```text
-https://github.com/johnzzyfries/tab-out
+https://github.com/johnzzyfries/tab-home
 ```
 
 助手会引导你完成安装，通常只需要约 1 分钟。
@@ -45,8 +45,8 @@ https://github.com/johnzzyfries/tab-out
 ### 1. 下载仓库
 
 ```bash
-git clone https://github.com/johnzzyfries/tab-out.git
-cd tab-out
+git clone https://github.com/johnzzyfries/tab-home.git
+cd tab-home
 ```
 
 也可以在 GitHub 仓库页面点击 **Code → Download ZIP**，下载后解压。
@@ -58,11 +58,11 @@ cd tab-out
 3. 点击左上角的 **加载已解压的扩展程序（Load unpacked）**。
 4. 选择仓库里的 **`extension/` 文件夹**。
 
-安装后，扩展列表中会出现 Tab Out。
+安装后，扩展列表中会出现 Tab Home。
 
 ### 3. 打开新标签页
 
-打开一个新标签页，即可看到 Tab Out。
+打开一个新标签页，即可看到 Tab Home。
 
 ---
 
@@ -91,7 +91,7 @@ cd tab-out
 
 点击收藏卡片会在新标签页中打开网站；拖动卡片可以调整顺序。已有的自定义收藏会自动加载。
 
-Chrome 书签需要先选择才会显示在收藏中。选中的书签会随 Chrome 书签更新；删除原书签后，对应卡片也会移除。在收藏编辑器中的修改只保存在 Tab Out 本地，不会修改 Chrome 书签。
+Chrome 书签需要先选择才会显示在收藏中。选中的书签会随 Chrome 书签更新；删除原书签后，对应卡片也会移除。在收藏编辑器中的修改只保存在 Tab Home 本地，不会修改 Chrome 书签。
 
 ---
 
@@ -105,7 +105,7 @@ git pull
 
 如果通过 ZIP 下载，请下载最新版本并解压到原安装位置。
 
-然后打开 `chrome://extensions`，点击 Tab Out 的 **重新加载（Reload）** 按钮，再刷新 Tab Out 页面或打开新标签页。
+然后打开 `chrome://extensions`，点击 Tab Home 的 **重新加载（Reload）** 按钮，再刷新 Tab Home 页面或打开新标签页。
 
 ---
 

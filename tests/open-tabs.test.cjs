@@ -11,7 +11,7 @@ async function openDashboard(pages = [
   { id: 4, url: 'https://b.example/', title: 'Third page' },
 ]) {
   const tabs = [
-    { id: 1, url: 'chrome-extension://tabout/index.html', title: 'Tab Out' }, ...pages,
+    { id: 1, url: 'chrome-extension://tabout/index.html', title: 'Tab Home' }, ...pages,
   ].map(tab => ({ windowId: 1, active: tab.id === 1, ...tab }));
   const nodes = new Map();
   const clickListeners = [];
@@ -91,7 +91,7 @@ async function openDashboard(pages = [
   };
 }
 
-test('updates the summary and cards after closing tabs in Tab Out and in Chrome', async () => {
+test('updates the summary and cards after closing tabs in Tab Home and in Chrome', async () => {
   const dashboard = await openDashboard();
   assert.equal(dashboard.total, 3);
   assert.match(dashboard.summary, /2 domains.*Close all 3 tabs/);

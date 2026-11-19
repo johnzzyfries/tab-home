@@ -174,6 +174,7 @@ function t(message, values = {}) {
 }
 
 const tabOutChinese = {
+  'Tab Home': '标签主页',
   'Pastel': '柔和彩色', 'Custom': '自定义', 'Preview': '预览',
   'Saved colors apply when you choose Custom in the Theme menu.': '保存后，在主题菜单选择「自定义」即可使用。',
   'Adjust colors': '调节颜色', 'Preview theme': '预览主题',
@@ -183,9 +184,9 @@ const tabOutChinese = {
   'Auto': '自动', 'Light': '浅色', 'Dark': '深色',
   'Favorites': '收藏', 'Edit favorites': '编辑收藏',
   'Adapted by Ziyuan Zhao': '由 Ziyuan Zhao 改版',
-  'Enjoying Tab Out?': '喜欢这个版本？',
+  'Enjoying Tab Home?': '喜欢标签主页？',
   'Give it a star on GitHub': '去 GitHub 点个小星星',
-  'You have': '你打开了', 'Tab Out tabs open. Keep just this one?': '个 Tab Out 标签页。只保留当前页？',
+  'You have': '你打开了', 'Tab Home tabs open. Keep just this one?': '个标签主页页面。只保留当前页？',
   'Close extras': '关闭多余页面', 'Windows & groups': '窗口与群组',
   'Drag a tab up or down to reorder it, or move it to another window or group.': '上下拖动标签页可排序，也可以拖到其他窗口或群组。',
   'Open tabs': '打开的标签页', 'Saved for later': '稍后阅读', 'Archive': '归档',
@@ -205,7 +206,7 @@ const tabOutChinese = {
   'Close all {n} tab': '关闭全部 {n} 个标签页', 'Close all {n} tabs': '关闭全部 {n} 个标签页',
   'Close {n} duplicate': '关闭 {n} 个重复项', 'Close {n} duplicates': '关闭 {n} 个重复项',
   'tabs': '标签页', 'Dismiss': '移除', 'No results': '没有匹配结果',
-  'Closed extra Tab Out tabs': '已关闭多余的 Tab Out 标签页', 'Tab closed': '已关闭标签页',
+  'Closed extra Tab Home tabs': '已关闭多余的标签主页页面', 'Tab closed': '已关闭标签页',
   'Failed to save tab': '保存标签页失败', 'Closed {n} tab from {group}': '已关闭「{group}」的 {n} 个标签页',
   'Closed {n} tabs from {group}': '已关闭「{group}」的 {n} 个标签页',
   'Closed duplicates, kept one copy each': '已关闭重复标签页，每个网页保留一个',
@@ -234,5 +235,5 @@ const tabOutChinese = {
   'Untitled tab': '无标题标签页', 'Move {title}': '移动 {title}', 'Move…': '移动…',
   'Window {n}': '窗口 {n}', 'Current': '当前', 'Ungrouped': '未分组', 'Unnamed group': '未命名群组',
   '{n} tab': '{n} 个标签页', '{n} tabs': '{n} 个标签页', 'Drop a tab here': '拖放标签页到此处',
-  'Could not load Chrome windows and groups. Reload Tab Out and check its tab group permission.': '无法加载 Chrome 窗口与群组。请重新加载 Tab Out 并检查群组权限。',
+  'Could not load Chrome windows and groups. Reload Tab Home and check its tab group permission.': '无法加载 Chrome 窗口与群组。请重新加载标签主页并检查群组权限。',
 };

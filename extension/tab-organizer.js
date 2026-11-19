@@ -195,7 +195,7 @@
       if (focusedTab) board.querySelector('[data-tab-id="' + focusedTab + '"] ' + focusedSelector)?.focus();
     } catch {
       if (version === renderVersion) {
-        status.textContent = t('Could not load Chrome windows and groups. Reload Tab Out and check its tab group permission.');
+        status.textContent = t('Could not load Chrome windows and groups. Reload Tab Home and check its tab group permission.');
       }
     }
   }
