@@ -1,6 +1,6 @@
 # Tab Out 当前中英引文清单
 
-共 49 条。第一轮保留 23 条，近现代批次保留 26 条。两批各自沿用原编号。第一轮采用已核对的译文，苏格拉底和《小王子》的中文使用指定措辞。
+共 43 条。第一轮保留 17 条，近现代批次保留 26 条。两批各自沿用原编号。采用已核对的译文，部分引文的中文使用指定措辞。
 
 ## 第一轮保留
 
@@ -53,34 +53,16 @@
   - 版本说明：孙致礼译，第二卷第十一章，对应英文单卷第二十三章。出自温特沃思写给安妮的信。 [中译正文](<https://www.99csw.com/book/9251/329993.htm>) · [中译本目录](<https://www.99csw.com/book/9251/index.htm>) · [英文第二十三章](<https://en.wikisource.org/wiki/Persuasion/Chapter_XXIII>)
 
 - [x] **36 · 艾米莉·狄金森（Emily Dickinson）**
-  - 中文：“希望”是个有羽毛的东西，／它栖息在灵魂里，
+  - 中文：“希望”是个有羽毛的东西，／它栖息在灵魂里。
   - English: “Hope” is the thing with feathers – / That perches in the soul –
   - 出处：[《希望是长羽毛的东西》 / Hope is the thing with feathers](<https://www.poetryfoundation.org/poems/42889/hope-is-the-thing-with-feathers-314>)
-  - 版本说明：江枫译，取诗的开头两行。 [署名中译全文](<https://www.sohu.com/a/801429061_691742>)
-
-- [x] **37 · 约翰·济慈（John Keats）**
-  - 中文：听见的乐声虽好，但若听不见／却更美
-  - English: Heard melodies are sweet, but those unheard / Are sweeter
-  - 出处：[《希腊古瓮颂》 / Ode on a Grecian Urn](<https://en.wikisource.org/wiki/Ode_on_a_Grecian_Urn>)
-  - 版本说明：查良铮译《希腊古瓮颂》，取第二节开头至第一个分号前。 [署名中译全文](<https://www.pinshiwen.com/gsdq/zwms/20190624125072.html>)
-
-- [x] **39 · 沃尔特·惠特曼（Walt Whitman）**
-  - 中文：我自相矛盾吗？／那好吧，我是自相矛盾的。
-  - English: Do I contradict myself? / Very well then I contradict myself,
-  - 出处：[《自我之歌》第五十一节 / Song of Myself, §51](<https://whitmanarchive.org/item/ppp.00707>)
-  - 版本说明：赵萝蕤译《我自己的歌》，上海译文出版社 1987 年版第 130 页。取第 51 节两行。 [引文及版本脚注](<https://neu-reality.com/2017/01/self-contradiction/>) · [1892 年版英文](<https://www.poetryfoundation.org/poems/45477/song-of-myself-1892-version>)
+  - 版本说明：中译依据江枫版本，取诗的开头两行，句末使用指定标点。 [署名中译全文](<https://www.sohu.com/a/801429061_691742>)
 
 - [x] **41 · 艾米莉·勃朗特（Emily Brontë）**
   - 中文：不管我们的灵魂是什么做的，他的和我的是完全一样的。
   - English: Whatever our souls are made of, his and mine are the same
   - 出处：[《呼啸山庄》第九章 / Wuthering Heights, Chapter IX](<https://www.gutenberg.org/files/768/768-h/768-h>)
   - 版本说明：杨苡译，第九章，凯瑟琳对内莉所说的话。中文截在提到林敦之前，句末标点按独立引句处理。 [中译正文](<https://www.99csw.com/book/8651/307015.htm>) · [河南工业大学图书馆摘录](<https://lib.haut.edu.cn/info/1309/3778.htm>) · [英文初版第一卷第九章](<https://en.wikisource.org/wiki/Wuthering_Heights_%281st_edition%29/Volume_1/Chapter_9>)
-
-- [x] **42 · 玛丽·雪莱（Mary Shelley）**
-  - 中文：要坚持你们的目标，做像岩石一样坚定的人！
-  - English: Be steady to your purposes, and firm as a rock.
-  - 出处：[《弗兰肯斯坦》 / Frankenstein](<https://www.gutenberg.org/cache/epub/41445/pg41445-images.html>)
-  - 版本说明：孙法理译，译林出版社 2016 年版。结尾沃尔顿的书信中记述维克多对船员的讲话。 [中译本](<https://www.scribd.com/document/789587033>) · [英文原著](<https://anthologydev.lib.virginia.edu/work/Shelley/shelley-frankenstein-1818.pdf>)
 
 - [x] **43 · 荀子（Xunzi）**
   - 中文：故不积跬步，无以至千里；不积小流，无以成江海。
@@ -106,29 +88,11 @@
   - 出处：[《谈谈方法》第四部分 / Discourse on Method, Part IV](<https://www.marxists.org/reference/subject/philosophy/works/fr/descarte.htm>)
   - 版本说明：中文采用指定措辞。法语原文是「je pense, donc je suis」。 [商务印书馆的版本说明](<https://www.cp.com.cn/Content/2013/11-11/1920345820.html>) · [英文版第四部分](<https://www.marxists.org/reference/subject/philosophy/works/fr/descarte.htm>)
 
-- [x] **54 · 巴鲁赫·斯宾诺莎（Baruch Spinoza）**
-  - 中文：但是一切高贵的事物，其难得正如它们的稀少一样。
-  - English: But all things excellent are as difficult as they are rare.
-  - 出处：[《伦理学》第五部，命题四十二附释 / Ethics, V, Proposition 42, Note](<https://en.wikisource.org/wiki/Ethics_(Spinoza)/Part_5>)
-  - 版本说明：贺麟中译、R. H. M. Elwes 英译，《伦理学》第五部命题四十二附释的结尾。 [中译本命题四十二附释](<https://www.scribd.com/document/877974200>) · [Elwes 英译](<https://en.wikisource.org/wiki/Ethics_(Spinoza)/Part_5>)
-
 - [x] **55 · 大卫·休谟（David Hume）**
   - 中文：理性是、并且也应该是情感的奴隶
   - English: Reason is, and ought only to be the slave of the passions.
   - 出处：[《人性论》2.3.3.4 / A Treatise of Human Nature, 2.3.3.4](<https://persweb.wabash.edu/facstaff/helmang/phi220txtbrwsr/Hume/Treatise/T2-3.html>)
   - 版本说明：关文运译《人性论》下册，商务印书馆版第 453 页。关译用「情感」，第一版用「激情」。两种语言均摘取该句前半。 [华南师大学报引述及版本脚注](<https://journal-s.scnu.edu.cn/cn/article/pdf/preview/f66ae6eb-691f-446a-b598-a2fe49453613.pdf>) · [按段编号的英文原文](<https://davidhume.org/texts/t/2/3/3>)
-
-- [x] **57 · 约翰·斯图亚特·密尔（John Stuart Mill）**
-  - 中文：对于本人自己，对于他自己的身和心，个人乃是最高主权者。
-  - English: Over himself, over his own body and mind, the individual is sovereign.
-  - 出处：[《论自由》第一章 / On Liberty, Chapter I](<https://davidmhart.com/liberty/EnglishClassicalLiberals/MilJS/1869_OnLiberty/Mill_OnLiberty1869.pdf>)
-  - 版本说明：许宝骙译《论自由》第一章，商务印书馆版。 [中译正文](<https://www.99csw.com/book/1581/42545.htm>) · [出版社书目](<https://www.cp.com.cn/book/cabe9cab-e.html>)
-
-- [x] **58 · 伯特兰·罗素（Bertrand Russell）**
-  - 中文：事实上，哲学的价值大部分须在它的极其不确定性之中去追求。
-  - English: The value of philosophy is, in fact, to be sought largely in its very uncertainty.
-  - 出处：[《哲学问题》第十五章 / The Problems of Philosophy, Chapter XV](<https://en.wikisource.org/wiki/The_Problems_of_Philosophy/Chapter_15>)
-  - 版本说明：何兆武译《哲学问题》第十五章，商务印书馆版。 [中译正文](<https://www.99csw.com/book/1181/34006.htm>) · [中译本目录](<https://www.99csw.com/book/1181/index.htm>)
 
 - [x] **59 · 玛丽·沃斯通克拉夫特（Mary Wollstonecraft）**
   - 中文：我不希望她们有支配男人的力量；而是希望她们有力量支配自己。
@@ -137,10 +101,10 @@
   - 版本说明：商务印书馆《女权辩护》中译本第四章，接在对卢梭的引述之后。 [商务版扫描本](<https://dl.ziliaozhan.win/%E4%B9%A6%E7%B1%8D/pdf/%E5%95%86%E5%8A%A1/%E5%A5%B3%E6%9D%83%E8%BE%A9%E6%8A%A4%20%E5%A6%87%E5%A5%B3%E7%9A%84%E5%B1%88%E4%BB%8E%E5%9C%B0%E4%BD%8D.pdf>) · [英文原著](<https://oll-resources.s3.amazonaws.com/titles/126/Wollstonecraft_0730_EBk_v6.0.pdf>)
 
 - [x] **60 · 弗里德里希·尼采（Friedrich Nietzsche）**
-  - 中文：没能杀死我的东西，使我更加强健。
+  - 中文：杀不死我的，终将使我更强大
   - English: That which does not kill me, makes me stronger.
   - 出处：[《偶像的黄昏》〈格言与箭〉第八节 / Twilight of the Idols, Maxims and Missiles, §8](<https://dev.gutenberg.org/files/52263/old/52263-h/52263-h.htm>)
-  - 版本说明：李超杰中译、Anthony M. Ludovici 英译，《偶像的黄昏》〈格言与箭〉第八节。两种语言均摘录格言破折号后的部分。 [李超杰译本](<https://www.scribd.com/document/1062931087>) · [Ludovici 英译](<https://www.sharper-than-time.com/book/Twilight%20of%20the%20Idols/Anthony%20M.%20Ludovici>)
+  - 版本说明：中文采用指定措辞。英译为 Anthony M. Ludovici 版本，节选自《偶像的黄昏》〈格言与箭〉第八节。 [李超杰译本](<https://www.scribd.com/document/1062931087>) · [Ludovici 英译](<https://www.sharper-than-time.com/book/Twilight%20of%20the%20Idols/Anthony%20M.%20Ludovici>)
 
 ## 近现代保留
 

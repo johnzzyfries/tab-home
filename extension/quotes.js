@@ -33,23 +33,11 @@ const quoteLibrary = [
     ]],
   ["艾米莉·狄金森", "Emily Dickinson", "《希望是长羽毛的东西》", "Hope is the thing with feathers",
     "https://www.poetryfoundation.org/poems/42889/hope-is-the-thing-with-feathers-314", [
-      ["“希望”是个有羽毛的东西，／它栖息在灵魂里，", "“Hope” is the thing with feathers – / That perches in the soul –"],
-    ]],
-  ["约翰·济慈", "John Keats", "《希腊古瓮颂》", "Ode on a Grecian Urn",
-    "https://en.wikisource.org/wiki/Ode_on_a_Grecian_Urn", [
-      ["听见的乐声虽好，但若听不见／却更美", "Heard melodies are sweet, but those unheard / Are sweeter"],
-    ]],
-  ["沃尔特·惠特曼", "Walt Whitman", "《自我之歌》第五十一节", "Song of Myself, §51",
-    "https://www.poetryfoundation.org/poems/45477/song-of-myself-1892-version", [
-      ["我自相矛盾吗？／那好吧，我是自相矛盾的。", "Do I contradict myself? / Very well then I contradict myself,"],
+      ["“希望”是个有羽毛的东西，／它栖息在灵魂里。", "“Hope” is the thing with feathers – / That perches in the soul –"],
     ]],
   ["艾米莉·勃朗特", "Emily Brontë", "《呼啸山庄》第九章", "Wuthering Heights, Chapter IX",
     "https://en.wikisource.org/wiki/Wuthering_Heights_%281st_edition%29/Volume_1/Chapter_9", [
       ["不管我们的灵魂是什么做的，他的和我的是完全一样的。", "Whatever our souls are made of, his and mine are the same"],
-    ]],
-  ["玛丽·雪莱", "Mary Shelley", "《弗兰肯斯坦》", "Frankenstein",
-    "https://anthologydev.lib.virginia.edu/work/Shelley/shelley-frankenstein-1818.pdf", [
-      ["要坚持你们的目标，做像岩石一样坚定的人！", "Be steady to your purposes, and firm as a rock."],
     ]],
   ["荀子", "Xunzi", "《荀子·劝学》", "Xunzi, Encouraging Learning",
     "https://www.fkf.mpg.de/7636344/dok123-EPFL_phd_thesis_final_HaonanHuang.pdf", [
@@ -67,21 +55,9 @@ const quoteLibrary = [
     "https://www.marxists.org/reference/subject/philosophy/works/fr/descarte.htm", [
       ["我思故我在", "I think, therefore I am."],
     ]],
-  ["巴鲁赫·斯宾诺莎", "Baruch Spinoza", "《伦理学》第五部，命题四十二附释", "Ethics, V, Proposition 42, Note",
-    "https://en.wikisource.org/wiki/Ethics_(Spinoza)/Part_5", [
-      ["但是一切高贵的事物，其难得正如它们的稀少一样。", "But all things excellent are as difficult as they are rare."],
-    ]],
   ["大卫·休谟", "David Hume", "《人性论》2.3.3.4", "A Treatise of Human Nature, 2.3.3.4",
     "https://davidhume.org/texts/t/2/3/3", [
       ["理性是、并且也应该是情感的奴隶", "Reason is, and ought only to be the slave of the passions."],
-    ]],
-  ["约翰·斯图亚特·密尔", "John Stuart Mill", "《论自由》第一章", "On Liberty, Chapter I",
-    "https://davidmhart.com/liberty/EnglishClassicalLiberals/MilJS/1869_OnLiberty/Mill_OnLiberty1869.pdf", [
-      ["对于本人自己，对于他自己的身和心，个人乃是最高主权者。", "Over himself, over his own body and mind, the individual is sovereign."],
-    ]],
-  ["伯特兰·罗素", "Bertrand Russell", "《哲学问题》第十五章", "The Problems of Philosophy, Chapter XV",
-    "https://en.wikisource.org/wiki/The_Problems_of_Philosophy/Chapter_15", [
-      ["事实上，哲学的价值大部分须在它的极其不确定性之中去追求。", "The value of philosophy is, in fact, to be sought largely in its very uncertainty."],
     ]],
   ["玛丽·沃斯通克拉夫特", "Mary Wollstonecraft", "《女权辩护》第四章", "A Vindication of the Rights of Woman, Chapter IV",
     "https://oll-resources.s3.amazonaws.com/titles/126/Wollstonecraft_0730_EBk_v6.0.pdf", [
@@ -89,7 +65,7 @@ const quoteLibrary = [
     ]],
   ["弗里德里希·尼采", "Friedrich Nietzsche", "《偶像的黄昏》〈格言与箭〉第八节", "Twilight of the Idols, Maxims and Missiles, §8",
     "https://www.sharper-than-time.com/book/Twilight%20of%20the%20Idols/Anthony%20M.%20Ludovici", [
-      ["没能杀死我的东西，使我更加强健。", "That which does not kill me, makes me stronger."],
+      ["杀不死我的，终将使我更强大", "That which does not kill me, makes me stronger."],
     ]],
   ["高尔基", "Maxim Gorky", "《我怎样读书》", "How I Studied",
     "https://michaelharrison.org.uk/wp-content/uploads/2022/03/On-Literature-by-Maxim-Gorky.pdf#page=17", [
