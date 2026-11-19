@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tab Out</title>
 
-  <!-- Google Fonts: Newsreader (for headings/numbers) + DM Sans (for body text) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
+  <script src="preferences.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,16 +14,48 @@
 
 
   <!-- ================================================================
-       HEADER — greeting on the left
+       HEADER — quote and appearance controls
        ================================================================ -->
   <header>
-    <div class="header-left">
-      <!-- "Good afternoon" — written by getGreeting() in app.js -->
-      <h1 id="greeting"></h1>
-      <!-- "Friday, April 4, 2026" — written by getDateDisplay() in app.js -->
+    <figure class="daily-quote">
+      <blockquote><p id="quotePrimary"></p></blockquote>
+      <p class="quote-translation" id="quoteSecondary"></p>
+      <figcaption><a id="quoteSource" target="_blank" rel="noopener noreferrer"></a></figcaption>
+    </figure>
+    <div class="header-meta">
       <div class="date" id="dateDisplay"></div>
+      <div class="dashboard-preferences" role="group" aria-label="Appearance" data-i18n-label="Appearance">
+        <label>
+          <span data-i18n="Theme">Theme</span>
+          <select id="themeMode">
+            <option value="auto" data-i18n="Auto">Auto</option>
+            <option value="light" data-i18n="Light">Light</option>
+            <option value="dark" data-i18n="Dark">Dark</option>
+            <option value="pastel" data-i18n="Pastel">Pastel</option>
+            <option value="custom" data-i18n="Custom">Custom</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="Language">Language</span>
+          <select id="languageMode">
+            <option value="en" lang="en">English</option>
+            <option value="zh-CN" lang="zh-CN">简体中文</option>
+          </select>
+        </label>
+        <button type="button" id="paletteOpen" class="favorites-edit" data-i18n="Adjust colors">Adjust colors</button>
+      </div>
     </div>
   </header>
+
+  <section class="favorites-section" aria-labelledby="favoritesHeading">
+    <div class="section-header">
+      <h2 id="favoritesHeading" data-i18n="Favorites">Favorites</h2>
+      <div class="section-line"></div>
+      <button type="button" class="favorites-edit" id="favoritesManage" data-i18n="Edit favorites">Edit favorites</button>
+    </div>
+    <div class="favorites-grid" id="favoritesGrid"></div>
+    <p class="favorites-status" id="favoritesStatus" role="status"></p>
+  </section>
 
   <!-- ================================================================
        TAB OUT DUPES BANNER — appears when you have extra Tab Out tabs open
@@ -40,11 +69,20 @@
         </svg>
       </div>
       <div class="tab-cleanup-text">
-        You have <strong id="tabOutDupeCount"></strong> Tab Out tabs open. Keep just this one?
+        <span data-i18n="You have">You have</span> <strong id="tabOutDupeCount"></strong> <span data-i18n="Tab Out tabs open. Keep just this one?">Tab Out tabs open. Keep just this one?</span>
       </div>
     </div>
-    <button class="tab-cleanup-btn" data-action="close-tabout-dupes">Close extras</button>
+    <button class="tab-cleanup-btn" data-action="close-tabout-dupes" data-i18n="Close extras">Close extras</button>
   </div>
+
+  <section class="tab-organizer" aria-labelledby="tabOrganizerHeading">
+    <details open>
+      <summary id="tabOrganizerHeading" data-i18n="Windows &amp; groups">Windows &amp; groups</summary>
+      <p class="organizer-hint" data-i18n="Drag a tab up or down to reorder it, or move it to another window or group.">Drag a tab up or down to reorder it, or move it to another window or group.</p>
+      <p id="tabOrganizerStatus" class="organizer-status" role="status"></p>
+      <div id="tabOrganizerWindows" class="organizer-windows"></div>
+    </details>
+  </section>
 
   <!-- ================================================================
        MAIN CONTENT AREA — two-column layout
@@ -57,7 +95,7 @@
     <!-- LEFT COLUMN: Open tabs -->
     <div class="active-section" id="openTabsSection" style="display:none">
       <div class="section-header">
-        <h2 id="openTabsSectionTitle">Right now</h2>
+        <h2><span data-i18n="Open tabs">Open tabs</span> <span class="open-tabs-total" id="openTabsTotal">0</span></h2>
         <div class="section-line"></div>
         <div class="section-count" id="openTabsSectionCount"></div>
       </div>
@@ -67,7 +105,7 @@
     <!-- RIGHT COLUMN: Saved for Later checklist -->
     <div class="deferred-column" id="deferredColumn" style="display:none">
       <div class="section-header">
-        <h2>Saved for later</h2>
+        <h2 data-i18n="Saved for later">Saved for later</h2>
         <div class="section-line"></div>
         <div class="section-count" id="deferredCount"></div>
       </div>
@@ -76,7 +114,7 @@
       <div class="deferred-list" id="deferredList"></div>
 
       <!-- Empty state — shown when no active deferred tabs -->
-      <div class="deferred-empty" id="deferredEmpty" style="display:none">
+      <div class="deferred-empty" id="deferredEmpty" data-i18n="Nothing saved. Living in the moment." style="display:none">
         Nothing saved. Living in the moment.
       </div>
 
@@ -84,11 +122,11 @@
       <div class="deferred-archive" id="deferredArchive" style="display:none">
         <button class="archive-toggle" id="archiveToggle">
           <svg class="archive-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
-          Archive
+          <span data-i18n="Archive">Archive</span>
           <span class="archive-count" id="archiveCount"></span>
         </button>
         <div class="archive-body" id="archiveBody" style="display:none">
-          <input type="text" class="archive-search" id="archiveSearch" placeholder="Search archived tabs...">
+          <input type="text" class="archive-search" id="archiveSearch" placeholder="Search archived tabs..." data-i18n-placeholder="Search archived tabs...">
           <div class="archive-list" id="archiveList"></div>
         </div>
       </div>
@@ -96,19 +134,12 @@
 
   </div><!-- end .dashboard-columns -->
 
-  <!-- ================================================================
-       FOOTER — global stats + refresh control
-       ================================================================ -->
   <footer>
-    <div class="footer-stats">
-      <div class="stat">
-        <div class="stat-num" id="statTabs">—</div>
-        <div class="stat-label">Open tabs</div>
-      </div>
-    </div>
-    <div class="last-refresh">
-      <span style="color: var(--muted); font-size: 11px;"><a href="https://github.com/zarazhangrui/tab-out" target="_top" style="color: var(--muted); text-decoration: underline; text-underline-offset: 2px;">Tab Out</a> by <a href="https://x.com/zarazhangrui" target="_top" style="color: var(--muted); text-decoration: underline; text-underline-offset: 2px;">Zara</a></span>
-    </div>
+    <p class="footer-credit" data-i18n="Adapted by Ziyuan Zhao">Adapted by Ziyuan Zhao</p>
+    <p class="footer-note">
+      <span data-i18n="Enjoying Tab Out?">Enjoying Tab Out?</span>
+      <a href="https://github.com/johnzzyfries/tab-out" target="_blank" rel="noopener noreferrer" data-i18n="Give it a star on GitHub">Give it a star on GitHub</a>
+    </p>
   </footer>
 
 </div><!-- end .container -->
@@ -125,11 +156,72 @@
   <span id="toastText"></span>
 </div>
 
+<dialog id="paletteDialog" class="favorites-dialog palette-dialog" aria-labelledby="paletteTitle">
+  <h2 id="paletteTitle" data-i18n="Adjust colors">Adjust colors</h2>
+  <label class="palette-field">
+    <span data-i18n="Preview theme">Preview theme</span>
+    <select id="paletteTheme">
+      <option value="light" data-i18n="Light">Light</option>
+      <option value="dark" data-i18n="Dark">Dark</option>
+    </select>
+  </label>
+  <div class="palette-swatches">
+    <label class="palette-field" for="paletteBackground">
+      <span data-i18n="Page background">Page background</span>
+      <input type="color" id="paletteBackground" value="#fcfdfd">
+    </label>
+    <output id="paletteBackgroundHex" for="paletteBackground">#FCFDFD</output>
+    <label class="palette-field" for="palettePanel">
+      <span data-i18n="Card color">Card color</span>
+      <input type="color" id="palettePanel" value="#e3eff7">
+    </label>
+    <output id="palettePanelHex" for="palettePanel">#E3EFF7</output>
+  </div>
+  <div id="paletteSample" class="palette-sample">
+    <span data-i18n="Preview">Preview</span>
+    <div id="paletteSampleCard" class="palette-sample-card" data-i18n="Favorites">Favorites</div>
+  </div>
+  <p class="palette-help" data-i18n="Saved colors apply when you choose Custom in the Theme menu.">Saved colors apply when you choose Custom in the Theme menu.</p>
+  <button type="button" id="paletteReset" data-i18n="Reset this theme">Reset this theme</button>
+  <div class="favorites-dialog-actions">
+    <button type="button" id="paletteCancel" data-i18n="Cancel">Cancel</button>
+    <button type="button" id="paletteSave" class="favorites-primary" data-i18n="Save colors">Save colors</button>
+  </div>
+</dialog>
+
+<dialog id="favoritesDialog" class="favorites-dialog" aria-labelledby="favoritesDialogTitle">
+  <h2 id="favoritesDialogTitle" data-i18n="Edit favorites">Edit favorites</h2>
+  <section aria-labelledby="bookmarkPickerTitle">
+    <h3 id="bookmarkPickerTitle" data-i18n="Choose Chrome bookmarks">Choose Chrome bookmarks</h3>
+    <input id="favoriteSearch" type="search" placeholder="Search bookmarks" aria-label="Search bookmarks" data-i18n-placeholder="Search bookmarks" data-i18n-label="Search bookmarks">
+    <p id="bookmarkPickerStatus" role="status"></p>
+    <div id="bookmarkPicker" class="bookmark-picker" role="group" aria-labelledby="bookmarkPickerTitle"></div>
+  </section>
+  <section aria-labelledby="customFavoritesTitle">
+    <h3 id="customFavoritesTitle" data-i18n="Custom websites">Custom websites</h3>
+    <ul id="favoriteCustomList" class="favorite-custom-list"></ul>
+    <form id="favoriteAddForm" class="favorite-add-form">
+      <label><span data-i18n="Website address">Website address</span><input id="favoriteUrl" type="text" inputmode="url" placeholder="example.com" required maxlength="4096"></label>
+      <label><span data-i18n="Name (optional)">Name (optional)</span><input id="favoriteName" type="text" maxlength="80"></label>
+      <button type="submit" data-i18n="Add website">Add website</button>
+    </form>
+  </section>
+  <p id="favoritesEditError" class="favorites-edit-error" role="alert"></p>
+  <div class="favorites-dialog-actions">
+    <button type="button" id="favoritesCancel" data-i18n="Cancel">Cancel</button>
+    <button type="button" id="favoritesSave" class="favorites-primary" data-i18n="Save favorites">Save favorites</button>
+  </div>
+</dialog>
+<script src="favorites-store.js"></script>
+<script src="favorites.js"></script>
+
 <!-- Personal config (gitignored) — defines LOCAL_LANDING_PAGE_PATTERNS etc. -->
 <!-- If the file doesn't exist, that's fine — app.js uses sensible defaults. -->
 <script src="config.local.js" onerror="/* no personal config, that's fine */"></script>
 
 <!-- Main dashboard logic — loads last so the DOM is ready -->
 <script src="app.js"></script>
+<script src="quotes.js"></script>
+<script src="tab-organizer.js"></script>
 </body>
 </html>
